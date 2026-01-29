@@ -19,6 +19,8 @@
     
     input, textarea, select { width: 100%; padding: 12px; margin-bottom: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; transition: 0.3s; background-color: #fff; }
     
+    ::placeholder { color: #999; opacity: 1; font-size: 13px; }
+
     .helper-text { font-size: 12px; color: #555; background-color: #f8f9fa; padding: 8px 10px; border-radius: 4px; border-right: 3px solid #17a2b8; margin-bottom: 15px; line-height: 1.4; white-space: pre-line; }
     .photo-instructions { background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 6px; font-size: 13px; margin-bottom: 10px; border: 1px solid #ffeeba; line-height: 1.5; }
     
@@ -34,7 +36,6 @@
     .caption-correct { color: #28a745; font-size: 11px; font-weight: bold; }
     .caption-wrong { color: #dc3545; font-size: 11px; font-weight: bold; }
 
-    /* تنسيق مربع الموافقة الجديد */
     .agreement-box {
         background-color: #e9ecef;
         padding: 15px;
@@ -50,7 +51,7 @@
         height: 25px;
         margin-top: 2px;
         cursor: pointer;
-        flex-shrink: 0; /* منع انكماش المربع */
+        flex-shrink: 0; 
     }
     .agreement-box label {
         font-size: 13px;
@@ -63,14 +64,15 @@
 
     #pSku { background-color: #e9ecef; color: #495057; font-weight: bold; letter-spacing: 1px; cursor: not-allowed; text-align: center; border: 2px solid #ced4da; margin-bottom: 15px; }
     
-    textarea { height: 100px; resize: vertical; }
+    textarea { height: 150px; resize: vertical; }
     select { cursor: pointer; margin-bottom: 15px; }
-    
-    .hidden-field { display: none; background-color: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px dashed #ccc; margin-bottom: 10px; }
     
     .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 15px; transition: 0.3s; }
     .upload-btn { background-color: #6c757d; color: white; }
     
+    /* لون مميز لزر رفع اللوجو */
+    .logo-btn { background-color: #6f42c1; color: white; } 
+
     .process-btn { background-color: #007bff; color: white; }
     .whatsapp-btn { background-color: #25D366; color: white; display: none; margin-top: 10px; animation: fadeIn 0.5s; text-decoration: none; text-align: center; display: block; }
     
@@ -103,11 +105,19 @@
     <input type="tel" id="vPhone" placeholder="01xxxxxxxxx" style="margin-bottom: 15px;">
     
     <label>نبذة عن العارض (Bio):</label>
-    <textarea id="vBio" placeholder="اكتب نبذة (عربي أو إنجليزي)..."></textarea>
+    <textarea id="vBio" placeholder="اكتب نبذة (عربي أو إنجليزي)..." style="height:100px;"></textarea>
     <div class="helper-text">
-<strong>مثال:</strong> My name is Riham Amer, a professional handcraft artist specialized in macramé. I create unique handmade pieces using threads, focusing mainly on home décor.
-I graduated from the Faculty of Arts, and I have been working as an English teacher for over 16 years.
+🛑 <strong>محتوى النبذة المطلوب:</strong>
+1. اسم الفنان الثلاثي.
+2. المحافظة المقيم بها.
+3. تفاصيل عن الخبرة (عدد السنين، تعلم الحرفة فين، إيه شغفه، الخ).
+⚠️ <strong>شرط:</strong> 75 كلمة على الأقل.
     </div>
+
+    <label>صورة شخصية أو لوجو البراند:</label>
+    <input type="file" id="vLogoInput" accept="image/*" style="display:none">
+    <button onclick="document.getElementById('vLogoInput').click()" class="btn logo-btn" id="logoSelectBtn">📸 رفع صورة العارض/اللوجو</button>
+    <div id="logoPreviewArea" style="margin-top:10px; text-align:center;"></div>
 
     <div class="section-title">📂 تصنيف المنتج</div>
     <label>القسم الرئيسي:</label>
@@ -123,36 +133,36 @@ I graduated from the Faculty of Arts, and I have been working as an English teac
     <div class="section-title">👕 تفاصيل المنتج</div>
     <label>اسم المنتج:</label>
     <input type="text" id="pName" placeholder="اكتب الاسم (عربي أو إنجليزي)">
-    <div class="helper-text"><strong>مثال:</strong> Crimson Radiance Beaded Bracelet</div>
+    <div class="helper-text">
+<strong>مثال:</strong> أسورة يد مطرزة بالخرز تصميم قرمزي لامع
+<br>⚠️ <strong>شرط:</strong> الاسم يجب أن يكون 6 كلمات على الأقل.
+    </div>
 
     <label>السعر (ج.م):</label>
     <input type="number" id="pPrice" placeholder="السعر" style="margin-bottom: 15px;">
     
-    <label>هل تتوفر مقاسات مختلفة؟</label>
-    <select id="hasSizes" onchange="toggleField('hasSizes', 'sizesContainer')">
-        <option value="no">لا، مقاس واحد (One Size)</option>
-        <option value="yes">نعم، يوجد مقاسات</option>
-    </select>
-    <div id="sizesContainer" class="hidden-field">
-        <label>اكتب المقاسات المتوفرة:</label>
-        <input type="text" id="pSizes" placeholder="مثال: S, M, L, XL">
-    </div>
+    <label>وزن المنتج تقريباً (بالجرامات):</label>
+    <input type="number" id="pWeight" placeholder="مثال: 250" style="margin-bottom: 15px;">
+    
+    <label>أبعاد المنتج (طول * عرض * ارتفاع):</label>
+    <input type="text" id="pDimensions" placeholder="مثال: 30 سم * 40 سم" style="margin-bottom: 15px;">
 
-    <label>هل تتوفر ألوان متعددة؟</label>
-    <select id="hasColors" onchange="toggleField('hasColors', 'colorsContainer')">
-        <option value="no">لا، لون واحد كما بالصورة</option>
-        <option value="yes">نعم، يوجد ألوان</option>
-    </select>
-    <div id="colorsContainer" class="hidden-field">
-        <label>اكتب الألوان المتوفرة:</label>
-        <input type="text" id="pColors" placeholder="مثال: أحمر، أزرق...">
-    </div>
+    <label>المقاسات المتوفرة:</label>
+    <input type="text" id="pSizes" placeholder="في حالة لا يوجد قم بكتابة لا يوجد">
 
-    <label>الوصف:</label>
-    <textarea id="pDesc" placeholder="اكتب التفاصيل (عربي أو إنجليزي)..."></textarea>
+    <label>الألوان المتوفرة:</label>
+    <input type="text" id="pColors" placeholder="في حالة لا يوجد قم بكتابة لا يوجد">
+
+    <label>قصة المنتج:</label>
+    <textarea id="pDesc" placeholder="احكي لنا قصة المنتج بالتفصيل..."></textarea>
     <div class="helper-text">
-<strong>مثال:</strong> An elegant handmade bracelet featuring a refined grid design that combines glossy black beads with silver-toned chains.
-Each bracelet is carefully handcrafted with attention to detail, ensuring a balanced structure.
+🛑 <strong>مهم جداً:</strong> قصة المنتج يجب أن تحتوي على:
+1. اسم الشخص اللي صنع المنتج
+2. من أي محافظة بمصر
+3. مستوحى فكرة المنتج من أيه
+4. الماتريل المستخدمة في صناعة المنتج
+5. مواصفات المنتج
+⚠️ <strong>شرط:</strong> يجب كتابة 75 كلمة على الأقل ليتم قبول الطلب.
     </div>
 
     <div class="section-title">📷 صور المنتج (الحد الأقصى 4)</div>
@@ -198,7 +208,6 @@ Each bracelet is carefully handcrafted with attention to detail, ensuring a bala
     <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
 
     <button onclick="processOrder()" id="processBtn" class="btn process-btn">ترجمة وتسجيل الطلب 🔄</button>
-    
     <a id="waLinkBtn" href="#" target="_blank" class="btn whatsapp-btn" onclick="finishAndReset()" style="display:none;">📲 اضغط هنا لإرسال واتساب</a>
 
   </div>
@@ -207,24 +216,19 @@ Each bracelet is carefully handcrafted with attention to detail, ensuring a bala
     // ⚠️⚠️ بياناتك ⚠️⚠️
     const CLOUD_NAME = "druttu7iu"; 
     const UPLOAD_PRESET = "Platform_Data"; 
-    const MY_PHONE_NUMBER = "201000000000"; 
+    const MY_PHONE_NUMBER = "201025889935"; 
     const MAX_IMAGES = 4;
     
-    // 🔴🔴 ضع رابط جوجل شيت هنا 🔴🔴
     const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzeDps9_rS_iiA6X9M4x2EP-fQwc1sBFhgF8ibgvyh8Z7fjHpCQ3KNU6upNtt_CrtA/exec"; 
+
+    // متغير لتخزين رابط اللوجو
+    let exhibitorLogoUrl = "";
 
     function generateSKU() {
         const now = new Date();
         const datePart = now.toISOString().slice(2,10).replace(/-/g, "");
         const randomPart = Math.floor(1000 + Math.random() * 9000);
         document.getElementById("pSku").value = `SKU-${datePart}-${randomPart}`;
-    }
-
-    function toggleField(selectId, containerId) {
-        const val = document.getElementById(selectId).value;
-        const container = document.getElementById(containerId);
-        if(val === 'yes') container.style.display = 'block';
-        else { container.style.display = 'none'; container.querySelector('input').value = ""; }
     }
 
     window.onload = function() {
@@ -266,6 +270,28 @@ Each bracelet is carefully handcrafted with attention to detail, ensuring a bala
 
     let uploadedUrls = []; 
 
+    // --- كود رفع اللوجو الخاص بالعارض ---
+    document.getElementById("vLogoInput").addEventListener("change", async function() {
+        const file = this.files[0];
+        if(!file) return;
+
+        const logoBtn = document.getElementById("logoSelectBtn");
+        logoBtn.innerText = "جاري رفع اللوجو...";
+        logoBtn.classList.add("disabled");
+
+        try {
+            // استخدام نفس دالة الرفع
+            exhibitorLogoUrl = await uploadToCloudinary(file, 'image');
+            document.getElementById("logoPreviewArea").innerHTML = `<img src="${exhibitorLogoUrl}" style="width:100px; height:100px; object-fit:contain; border-radius:50%; border:2px solid #6f42c1;">`;
+            logoBtn.innerText = "✅ تم رفع اللوجو";
+        } catch(e) {
+            alert("❌ فشل رفع اللوجو: " + e);
+            logoBtn.innerText = "📸 رفع صورة العارض/اللوجو";
+        }
+        logoBtn.classList.remove("disabled");
+    });
+
+    // --- كود رفع صور المنتجات ---
     document.getElementById("fileInput").addEventListener("change", async function() {
         const files = this.files;
         if(files.length === 0) return;
@@ -342,11 +368,16 @@ Each bracelet is carefully handcrafted with attention to detail, ensuring a bala
         let fileContent = '\uFEFF'; 
         fileContent += `--- ملف بيانات المنتج ---\nSKU: ${data.sku}\nDate: ${new Date().toLocaleDateString()}\n`;
         fileContent += `----------------------------\n[Exhibitor Info]\nName: ${data.vName}\nPhone: ${data.vPhone}\nBio (Ar): ${data.bioObj.ar}\nBio (En): ${data.bioObj.en}\n`;
+        // إضافة اللوجو للملف النصي
+        if(data.exhibitorLogoUrl) {
+            let logoDl = data.exhibitorLogoUrl.replace('q_auto,f_auto', `q_auto,f_jpg,fl_attachment:Logo_${data.vPhone}`);
+            fileContent += `Logo URL: ${logoDl}\n`;
+        }
         fileContent += `----------------------------\n[Category]\nMain: ${data.mainCat}\nSub: ${data.subCat}\n`;
-        fileContent += `----------------------------\n[Details]\nName (Ar): ${data.nameObj.ar}\nName (En): ${data.nameObj.en}\nPrice: ${data.price}\n`;
+        fileContent += `----------------------------\n[Details]\nName (Ar): ${data.nameObj.ar}\nName (En): ${data.nameObj.en}\nPrice: ${data.price}\nWeight: ${data.weight} g\nDimensions: ${data.dimensionsObj.en}\n`;
         if(data.sizesObj.ar) fileContent += `Sizes (Ar): ${data.sizesObj.ar}\nSizes (En): ${data.sizesObj.en}\n`;
         if(data.colorsObj.ar) fileContent += `Colors (Ar): ${data.colorsObj.ar}\nColors (En): ${data.colorsObj.en}\n`;
-        fileContent += `Desc (Ar): ${data.descObj.ar}\nDesc (En): ${data.descObj.en}\n`;
+        fileContent += `Product Story (Ar): ${data.descObj.ar}\nProduct Story (En): ${data.descObj.en}\n`;
         fileContent += `----------------------------\n[Images]\n`;
         data.uploadedUrls.forEach((url, i) => {
              let imgName = `${data.sku}_${i+1}`;
@@ -374,17 +405,43 @@ Each bracelet is carefully handcrafted with attention to detail, ensuring a bala
         const subCat = document.getElementById("subCategory").value;
         const nameInput = document.getElementById("pName").value;
         const price = document.getElementById("pPrice").value;
+        const weight = document.getElementById("pWeight").value;
+        const dimensionsInput = document.getElementById("pDimensions").value;
         const descInput = document.getElementById("pDesc").value;
-        const hasSizes = document.getElementById("hasSizes").value;
-        const sizesInput = hasSizes === 'yes' ? document.getElementById("pSizes").value : "";
-        const hasColors = document.getElementById("hasColors").value;
-        const colorsInput = hasColors === 'yes' ? document.getElementById("pColors").value : "";
+        const sizesInput = document.getElementById("pSizes").value;
+        const colorsInput = document.getElementById("pColors").value;
 
         const processBtn = document.getElementById("processBtn");
         const waLinkBtn = document.getElementById("waLinkBtn");
 
         if(!vName || !vPhone || !vBioInput || !nameInput || !mainCat || !subCat) { alert("أكمل البيانات"); return; }
-        if(uploadedUrls.length === 0) { alert("ارفع صور"); return; }
+        
+        // 🛑 التحقق من عدد كلمات نبذة العارض (75 كلمة)
+        const bioWordCount = vBioInput.trim().split(/\s+/).length;
+        if (bioWordCount < 75) {
+            alert(`⚠️ نبذة العارض قصيرة جداً!\nلقد كتبت ${bioWordCount} كلمة فقط.\nالمطلوب 75 كلمة على الأقل.`);
+            return;
+        }
+
+        // 🛑 التحقق من عدد كلمات اسم المنتج (6 كلمات)
+        const nameWordCount = nameInput.trim().split(/\s+/).length;
+        if (nameWordCount < 6) {
+            alert(`⚠️ اسم المنتج قصير جداً!\nيجب أن يتكون الاسم من 6 كلمات على الأقل.`);
+            return;
+        }
+
+        if(!dimensionsInput) { alert("من فضلك اكتب أبعاد المنتج"); return; }
+        if(!sizesInput) { alert("من فضلك اكتب المقاسات"); return; }
+        if(!colorsInput) { alert("من فضلك اكتب الألوان"); return; }
+        
+        // 🛑 التحقق من عدد كلمات قصة المنتج (75 كلمة)
+        const descWordCount = descInput.trim().split(/\s+/).length;
+        if (descWordCount < 75) {
+            alert(`⚠️ قصة المنتج قصيرة جداً!\nلقد كتبت ${descWordCount} كلمة فقط.\nالمطلوب 75 كلمة على الأقل.`);
+            return;
+        }
+
+        if(uploadedUrls.length === 0) { alert("ارفع صور للمنتج"); return; }
 
         processBtn.innerText = "⏳ جاري الترجمة والحفظ...";
         processBtn.classList.add("disabled");
@@ -396,32 +453,45 @@ Each bracelet is carefully handcrafted with attention to detail, ensuring a bala
         const nameObj = await smartTranslate(nameInput);
         const descObj = await smartTranslate(descInput);
         const bioObj = await smartTranslate(vBioInput);
-        const sizesObj = sizesInput ? await smartTranslate(sizesInput) : {ar: "", en: ""};
-        const colorsObj = colorsInput ? await smartTranslate(colorsInput) : {ar: "", en: ""};
+        const sizesObj = await smartTranslate(sizesInput);
+        const colorsObj = await smartTranslate(colorsInput);
+        const dimensionsObj = await smartTranslate(dimensionsInput);
 
         // 3. رفع الملف النصي
         let textFileUrl = "";
         try {
-            const productData = { sku, vName, vPhone, bioObj, mainCat, subCat, nameObj, price, descObj, sizesObj, colorsObj, uploadedUrls };
+            const productData = { sku, vName, vPhone, bioObj, mainCat, subCat, nameObj, price, weight, dimensionsObj, descObj, sizesObj, colorsObj, uploadedUrls, exhibitorLogoUrl };
             textFileUrl = await createAndUploadTextFile(productData);
             if(textFileUrl) textFileUrl = textFileUrl.replace('/upload/', `/upload/fl_attachment:${sku}/`);
         } catch (e) { console.error(e); }
 
         // 4. تجهيز رسالة الواتساب
         let message = `*طلب تسجيل منتج جديد* \n======================== \n*SKU:* ${sku} \n======================== \n`;
-        message += `👤 *الاسم:* ${vName} \n📞 *الهاتف:* ${vPhone} \n📝 *النبذة:* ${bioObj.ar} \n======================== \n`;
+        message += `👤 *الاسم:* ${vName} \n📞 *الهاتف:* ${vPhone} \n📝 *النبذة:* ${bioObj.ar} \n`;
+        
+        // إضافة اللوجو للرسالة
+        if (exhibitorLogoUrl) {
+            let logoDl = exhibitorLogoUrl.replace('q_auto,f_auto', `q_auto,f_jpg,fl_attachment:Logo_${vPhone}`);
+            message += `🖼️ *صورة العارض/اللوجو:*\n${exhibitorLogoUrl} \n⬇️ ${logoDl}\n`;
+        }
+        message += `======================== \n`;
+
         message += `📂 *التصنيف:* ${mainCat} -> ${subCat} \n======================== \n`;
         message += `🇪🇬 *عربي:* \n🏷️ ${nameObj.ar} \n`;
-        if(sizesObj.ar) message += `📏 المقاسات: ${sizesObj.ar} \n`;
-        if(colorsObj.ar) message += `🎨 الألوان: ${colorsObj.ar} \n`;
-        if(descObj.ar) message += `📝 ${descObj.ar} \n`;
+        message += `📏 المقاسات: ${sizesObj.ar} \n`;
+        message += `🎨 الألوان: ${colorsObj.ar} \n`;
+        message += `📏 الأبعاد: ${dimensionsObj.ar} \n`;
+        message += `📖 *قصة المنتج:* \n${descObj.ar} \n`;
         message += `------------------------ \n`;
         message += `🇺🇸 *English:* \n🏷️ ${nameObj.en} \n`;
-        if(sizesObj.en) message += `📏 Sizes: ${sizesObj.en} \n`;
-        if(colorsObj.en) message += `🎨 Colors: ${colorsObj.en} \n`;
-        if(descObj.en) message += `📝 ${descObj.en} \n`;
+        message += `📏 Sizes: ${sizesObj.en} \n`;
+        message += `🎨 Colors: ${colorsObj.en} \n`;
+        message += `📏 Dimensions: ${dimensionsObj.en} \n`;
+        message += `📖 *Story:* \n${descObj.en} \n`;
         message += `📝 *Bio:* ${bioObj.en} \n======================== \n`;
         message += `💰 *السعر:* ${price} ج.م \n`;
+        message += `⚖️ *الوزن:* ${weight} جم \n`;
+        
         if(textFileUrl) message += `📄 *ملف البيانات:* ${textFileUrl} \n======================== \n`;
         message += `📷 *الصور:* \n`;
         uploadedUrls.forEach((url, i) => {
@@ -438,26 +508,24 @@ Each bracelet is carefully handcrafted with attention to detail, ensuring a bala
         document.getElementById("successMsg").style.display = "block";
     }
 
-    // --- دالة الريفرش الذكي (تُستدعى عند الضغط على زر الواتساب) ---
+    // --- دالة الريفرش الذكي ---
     function finishAndReset() {
         setTimeout(() => {
-            // مسح بيانات المنتج فقط
+            // مسح بيانات المنتج فقط (والحفاظ على بيانات العارض واللوجو)
             document.getElementById("pName").value = "";
             document.getElementById("pPrice").value = "";
+            document.getElementById("pWeight").value = "";
+            document.getElementById("pDimensions").value = "";
             document.getElementById("pDesc").value = "";
-            document.getElementById("hasSizes").value = "no";
-            toggleField('hasSizes', 'sizesContainer');
-            document.getElementById("hasColors").value = "no";
-            toggleField('hasColors', 'colorsContainer');
+            document.getElementById("pSizes").value = "";
+            document.getElementById("pColors").value = "";
 
             document.getElementById("fileInput").value = "";
             document.getElementById("previewArea").innerHTML = "";
             uploadedUrls = []; 
             
-            // إزالة علامة الصح من الشروط
             document.getElementById("agreementCheck").checked = false;
 
-            // إعادة الأزرار
             document.getElementById("processBtn").style.display = "block";
             document.getElementById("processBtn").innerText = "ترجمة وتسجيل الطلب 🔄";
             document.getElementById("processBtn").classList.remove("disabled");
@@ -477,5 +545,3 @@ Each bracelet is carefully handcrafted with attention to detail, ensuring a bala
 
 </body>
 </html>
-
-```
