@@ -69,12 +69,23 @@
     
     .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 15px; transition: 0.3s; }
     .upload-btn { background-color: #6c757d; color: white; }
-    
-    /* لون مميز لزر رفع اللوجو */
     .logo-btn { background-color: #6f42c1; color: white; } 
 
     .process-btn { background-color: #007bff; color: white; }
-    .whatsapp-btn { background-color: #25D366; color: white; display: none; margin-top: 10px; animation: fadeIn 0.5s; text-decoration: none; text-align: center; display: block; }
+    
+    /* تنسيق زر الواتساب الجديد عشان يكون ملفت جداً */
+    .whatsapp-btn { 
+        background-color: #25D366; 
+        color: white; 
+        display: none; 
+        margin-top: 10px; 
+        animation: pulse 1.5s infinite; /* تأثير نبض */
+        text-decoration: none; 
+        text-align: center; 
+        font-size: 18px;
+        border: 2px solid #128C7E;
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+    }
     
     .disabled { background-color: #ccc; cursor: not-allowed; }
 
@@ -82,9 +93,26 @@
     .preview-list { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; justify-content: center; }
     .preview-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
     
-    .success-msg { display: none; background: #d4edda; color: #155724; padding: 10px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1px solid #c3e6cb; }
+    /* رسالة التحذير بدلاً من النجاح */
+    .warning-msg { 
+        display: none; 
+        background: #fff3cd; 
+        color: #856404; 
+        padding: 15px; 
+        border-radius: 6px; 
+        text-align: center; 
+        margin-top: 15px; 
+        border: 2px solid #ffeeba;
+        font-weight: bold;
+        font-size: 15px;
+    }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -203,12 +231,18 @@
         </label>
     </div>
 
-    <div id="successMsg" class="success-msg">✅ تم تسجيل البيانات بنجاح! اضغط بالأسفل لإرسال الواتساب.</div>
+    <div id="warningMsg" class="warning-msg">
+        ⚠️ انتباه: لم ينتهي الطلب بعد!<br>
+        يجب الضغط على زر الواتساب بالأسفل لإرسال البيانات والتأكيد.
+    </div>
 
     <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
 
-    <button onclick="processOrder()" id="processBtn" class="btn process-btn">ترجمة وتسجيل الطلب 🔄</button>
-    <a id="waLinkBtn" href="#" target="_blank" class="btn whatsapp-btn" onclick="finishAndReset()" style="display:none;">📲 اضغط هنا لإرسال واتساب</a>
+    <button onclick="processOrder()" id="processBtn" class="btn process-btn">ترجمة وتسجيل البيانات 🔄</button>
+    
+    <a id="waLinkBtn" href="#" target="_blank" class="btn whatsapp-btn" onclick="finishAndReset()">
+        👉 اضغط هنا لإرسال الواتساب (خطوة أخيرة) 📲
+    </a>
 
   </div>
 
@@ -221,7 +255,6 @@
     
     const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzeDps9_rS_iiA6X9M4x2EP-fQwc1sBFhgF8ibgvyh8Z7fjHpCQ3KNU6upNtt_CrtA/exec"; 
 
-    // متغير لتخزين رابط اللوجو
     let exhibitorLogoUrl = "";
 
     function generateSKU() {
@@ -270,17 +303,14 @@
 
     let uploadedUrls = []; 
 
-    // --- كود رفع اللوجو الخاص بالعارض ---
+    // --- كود رفع اللوجو ---
     document.getElementById("vLogoInput").addEventListener("change", async function() {
         const file = this.files[0];
         if(!file) return;
-
         const logoBtn = document.getElementById("logoSelectBtn");
         logoBtn.innerText = "جاري رفع اللوجو...";
         logoBtn.classList.add("disabled");
-
         try {
-            // استخدام نفس دالة الرفع
             exhibitorLogoUrl = await uploadToCloudinary(file, 'image');
             document.getElementById("logoPreviewArea").innerHTML = `<img src="${exhibitorLogoUrl}" style="width:100px; height:100px; object-fit:contain; border-radius:50%; border:2px solid #6f42c1;">`;
             logoBtn.innerText = "✅ تم رفع اللوجو";
@@ -298,8 +328,7 @@
         if (uploadedUrls.length + files.length > MAX_IMAGES) {
             alert(`⛔ تنبيه: الحد الأقصى هو ${MAX_IMAGES} صور.`); this.value = ""; return;
         }
-
-        document.getElementById("successMsg").style.display = "none";
+        document.getElementById("warningMsg").style.display = "none";
         const status = document.getElementById("status");
         const selectBtn = document.getElementById("selectBtn");
         
@@ -368,7 +397,6 @@
         let fileContent = '\uFEFF'; 
         fileContent += `--- ملف بيانات المنتج ---\nSKU: ${data.sku}\nDate: ${new Date().toLocaleDateString()}\n`;
         fileContent += `----------------------------\n[Exhibitor Info]\nName: ${data.vName}\nPhone: ${data.vPhone}\nBio (Ar): ${data.bioObj.ar}\nBio (En): ${data.bioObj.en}\n`;
-        // إضافة اللوجو للملف النصي
         if(data.exhibitorLogoUrl) {
             let logoDl = data.exhibitorLogoUrl.replace('q_auto,f_auto', `q_auto,f_jpg,fl_attachment:Logo_${data.vPhone}`);
             fileContent += `Logo URL: ${logoDl}\n`;
@@ -413,33 +441,20 @@
 
         const processBtn = document.getElementById("processBtn");
         const waLinkBtn = document.getElementById("waLinkBtn");
+        const warningMsg = document.getElementById("warningMsg");
 
         if(!vName || !vPhone || !vBioInput || !nameInput || !mainCat || !subCat) { alert("أكمل البيانات"); return; }
         
-        // 🛑 التحقق من عدد كلمات نبذة العارض (75 كلمة)
+        // التحقق من عدد الكلمات
         const bioWordCount = vBioInput.trim().split(/\s+/).length;
-        if (bioWordCount < 75) {
-            alert(`⚠️ نبذة العارض قصيرة جداً!\nلقد كتبت ${bioWordCount} كلمة فقط.\nالمطلوب 75 كلمة على الأقل.`);
-            return;
-        }
-
-        // 🛑 التحقق من عدد كلمات اسم المنتج (6 كلمات)
+        if (bioWordCount < 75) { alert(`⚠️ نبذة العارض قصيرة! (${bioWordCount} كلمة). المطلوب 75 على الأقل.`); return; }
         const nameWordCount = nameInput.trim().split(/\s+/).length;
-        if (nameWordCount < 6) {
-            alert(`⚠️ اسم المنتج قصير جداً!\nيجب أن يتكون الاسم من 6 كلمات على الأقل.`);
-            return;
-        }
-
-        if(!dimensionsInput) { alert("من فضلك اكتب أبعاد المنتج"); return; }
-        if(!sizesInput) { alert("من فضلك اكتب المقاسات"); return; }
-        if(!colorsInput) { alert("من فضلك اكتب الألوان"); return; }
-        
-        // 🛑 التحقق من عدد كلمات قصة المنتج (75 كلمة)
+        if (nameWordCount < 6) { alert(`⚠️ اسم المنتج قصير! (${nameWordCount} كلمات). المطلوب 6 على الأقل.`); return; }
+        if(!dimensionsInput) { alert("اكتب أبعاد المنتج"); return; }
+        if(!sizesInput) { alert("اكتب المقاسات"); return; }
+        if(!colorsInput) { alert("اكتب الألوان"); return; }
         const descWordCount = descInput.trim().split(/\s+/).length;
-        if (descWordCount < 75) {
-            alert(`⚠️ قصة المنتج قصيرة جداً!\nلقد كتبت ${descWordCount} كلمة فقط.\nالمطلوب 75 كلمة على الأقل.`);
-            return;
-        }
+        if (descWordCount < 75) { alert(`⚠️ قصة المنتج قصيرة! (${descWordCount} كلمة). المطلوب 75 على الأقل.`); return; }
 
         if(uploadedUrls.length === 0) { alert("ارفع صور للمنتج"); return; }
 
@@ -468,14 +483,11 @@
         // 4. تجهيز رسالة الواتساب
         let message = `*طلب تسجيل منتج جديد* \n======================== \n*SKU:* ${sku} \n======================== \n`;
         message += `👤 *الاسم:* ${vName} \n📞 *الهاتف:* ${vPhone} \n📝 *النبذة:* ${bioObj.ar} \n`;
-        
-        // إضافة اللوجو للرسالة
         if (exhibitorLogoUrl) {
             let logoDl = exhibitorLogoUrl.replace('q_auto,f_auto', `q_auto,f_jpg,fl_attachment:Logo_${vPhone}`);
             message += `🖼️ *صورة العارض/اللوجو:*\n${exhibitorLogoUrl} \n⬇️ ${logoDl}\n`;
         }
         message += `======================== \n`;
-
         message += `📂 *التصنيف:* ${mainCat} -> ${subCat} \n======================== \n`;
         message += `🇪🇬 *عربي:* \n🏷️ ${nameObj.ar} \n`;
         message += `📏 المقاسات: ${sizesObj.ar} \n`;
@@ -491,7 +503,6 @@
         message += `📝 *Bio:* ${bioObj.en} \n======================== \n`;
         message += `💰 *السعر:* ${price} ج.م \n`;
         message += `⚖️ *الوزن:* ${weight} جم \n`;
-        
         if(textFileUrl) message += `📄 *ملف البيانات:* ${textFileUrl} \n======================== \n`;
         message += `📷 *الصور:* \n`;
         uploadedUrls.forEach((url, i) => {
@@ -499,19 +510,18 @@
             message += `${i+1}. ${url} \n⬇️ ${dl} \n\n`;
         });
 
-        // 5. تفعيل زر الواتساب
+        // 5. إظهار زر الواتساب وإخفاء زر المعالجة
         const finalLink = `https://wa.me/${201025889935}?text=${encodeURIComponent(message)}`;
         waLinkBtn.href = finalLink;
-        waLinkBtn.style.display = "block";
         
-        processBtn.style.display = "none";
-        document.getElementById("successMsg").style.display = "block";
+        processBtn.style.display = "none"; // إخفاء زر المعالجة
+        waLinkBtn.style.display = "block"; // إظهار زر الواتساب
+        warningMsg.style.display = "block"; // إظهار رسالة التحذير
     }
 
     // --- دالة الريفرش الذكي ---
     function finishAndReset() {
         setTimeout(() => {
-            // مسح بيانات المنتج فقط (والحفاظ على بيانات العارض واللوجو)
             document.getElementById("pName").value = "";
             document.getElementById("pPrice").value = "";
             document.getElementById("pWeight").value = "";
@@ -526,12 +536,13 @@
             
             document.getElementById("agreementCheck").checked = false;
 
+            // إعادة الأزرار للحالة الأولى
             document.getElementById("processBtn").style.display = "block";
             document.getElementById("processBtn").innerText = "ترجمة وتسجيل الطلب 🔄";
             document.getElementById("processBtn").classList.remove("disabled");
             
             document.getElementById("waLinkBtn").style.display = "none";
-            document.getElementById("successMsg").style.display = "none";
+            document.getElementById("warningMsg").style.display = "none"; // إخفاء التحذير
             document.getElementById("status").innerText = "";
             document.getElementById("selectBtn").innerText = "📸 رفع الصور (Max 4)";
             document.getElementById("selectBtn").classList.remove("disabled");
